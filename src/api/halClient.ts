@@ -30,7 +30,7 @@ export function mergeHalArray<T>(objs: Resource[]): (T & Resource)[] {
 export async function login(username: string, password: string) {
     const authorization = `Basic ${btoa(`${username}:${password}`)}`;
     const res = await fetch(`${API_BASE_URL}/identity`, {
-        headers: { Authorisation: authorization },
+        headers: { Authorization: authorization },
         cache: "no-store",
     });
 
@@ -66,7 +66,7 @@ export async function postHal(path: string, body: Resource, options: RequestInit
         headers: {
             "Content-Type": "application/json",
             Accept: "application/hal+json",
-            ...options.headers
+            ...addAuthHeader(options.headers)
         },
         body: JSON.stringify(body),
         cache: "no-store",
