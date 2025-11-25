@@ -2,13 +2,14 @@
 
 import React from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
+import { useRouter } from "next/navigation";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { createUser } from "@/api/userApi";
 import { User } from "@/types/user";
-import {useRouter} from "next/navigation";
+import {UsersService} from "@/api/userApi";
+import {clientAuthProvider} from "@/lib/authProvider";
 
 type FormValues = {
     username: string;
@@ -17,6 +18,7 @@ type FormValues = {
 };
 
 export default function RegistrationPage() {
+    const service = new UsersService(clientAuthProvider())
     const {
         register,
         handleSubmit,
@@ -26,7 +28,7 @@ export default function RegistrationPage() {
     const router = useRouter();
 
     const onSubmit: SubmitHandler<FormValues> = (data) => {
-        createUser(data as User).then(() => {
+        service.createUser(data as User).then(() => {
             router.push("/login");
         })
     };

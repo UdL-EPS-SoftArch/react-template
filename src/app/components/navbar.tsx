@@ -1,15 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
+import { useAuth } from "@/app/components/authentication";
+import Loginbar from "@/app/components/loginbar";
 
 export default function Navbar() {
     const pathname = usePathname();
+    const {user} = useAuth();
 
     const navLinks = [
-        { href: "/", label: "Home" },
-        { href: "/users", label: "Users" }
+        {href: "/", label: "Home"},
+        {href: "/users", label: "Users", roles: ["ROLE_USER"]}
     ];
 
     return (
@@ -27,23 +30,32 @@ export default function Navbar() {
                 </div>
 
                 <div className="flex gap-4">
-                    {navLinks.map(({ href, label }) => {
-                        const active = pathname === href;
-                        return (
-                            <Link
-                                key={href}
-                                href={href}
-                                className={
-                                    active
-                                        ? "text-blue-600 font-medium border-b-2 border-blue-600 pb-1"
-                                        : "text-gray-600 hover:text-gray-900 transition"
-                                }
-                            >
-                                {label}
-                            </Link>
-                        );
-                    })}
+                    {navLinks
+                        .filter(({roles}) =>
+                            !roles || user?.authorities?.some(
+                                userAuth => roles.includes(userAuth.authority)))
+                        .map(({href, label}) => {
+                            const active = pathname === href;
+                            return (
+                                <Link
+                                    key={href}
+                                    href={href}
+                                    className={
+                                        active
+                                            ? "text-blue-600 font-medium border-b-2 border-blue-600 pb-1"
+                                            : "text-gray-600 hover:text-gray-900 transition"
+                                    }
+                                >
+                                    {label}
+                                </Link>
+                            );
+                        })}
                 </div>
+
+                <div className="ml-auto">
+                    <Loginbar/>
+                </div>
+
             </div>
         </nav>
     );

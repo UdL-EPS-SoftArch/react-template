@@ -1,12 +1,15 @@
 import { Resource } from "halfred";
 
-// Entity fields
+export interface AuthorityEntity {
+    authority: string;
+}
+
 export interface UserEntity {
-    id?: number;
+    uri?: string;
     username: string;
     email?: string;
     password?: string;
+    authorities?: AuthorityEntity[];
 }
 
-// Combine with HAL Resource
 export type User = UserEntity & Resource;
