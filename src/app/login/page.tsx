@@ -1,15 +1,16 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useForm, SubmitHandler } from "react-hook-form";
+import { useAuth } from "@/app/components/authentication";
+import { deleteCookie, setCookie } from "cookies-next";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { createUser } from "@/api/userApi";
-import { User } from "@/types/user";
-import { useRouter } from "next/navigation";
-import {login} from "@/api/halClient";
+import { UsersService } from "@/api/userApi";
+import { clientAuthProvider } from "@/lib/authProvider";
 
 type FormValues = {
     username: string;
@@ -17,18 +18,32 @@ type FormValues = {
 };
 
 export default function LoginPage() {
-    const {
-        register,
-        handleSubmit,
-        formState: { errors, isSubmitting },
-    } = useForm<FormValues>();
-
     const router = useRouter();
+    const { setUser } = useAuth();
+    const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormValues>();
+    const [ errorMessage, setErrorMessage ] = useState<string | null>(null);
+
+    async function login(username: string, password: string) {
+        setErrorMessage(null);
+        const authorization = `Basic ${btoa(`${username}:${password}`)}`;
+        setCookie("MYCOFFEE_AUTH", authorization, {
+            path: "/",
+            secure: true,
+            sameSite: "strict",
+            httpOnly: false,
+        });
+        const service = new UsersService(clientAuthProvider());
+        const user = await service.getCurrentUser();
+        setUser(user);
+    }
 
     const onSubmit: SubmitHandler<FormValues> = (data) => {
         login(data.username, data.password).then(() => {
-            router.push("/users");
-        })
+            router.push(`/users/${data.username}`);
+        }).catch(() => {
+            deleteCookie("MYCOFFEE_AUTH");
+            setErrorMessage("Login failed");
+        });
     };
 
     return (
@@ -41,8 +56,11 @@ export default function LoginPage() {
                         </CardHeader>
                         <CardContent>
                             <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
+                                {errorMessage && ( // Display error message if present
+                                    <p className="text-sm text-red-600 mt-1">{errorMessage}</p>
+                                )}
                                 <div>
-                                    <Label htmlFor="name">Name</Label>
+                                    <Label htmlFor="username">Username</Label> {/* Changed htmlFor to username */}
                                     <Input
                                         id="username"
                                         {...register("username", { required: "Username is required" })}
@@ -67,7 +85,7 @@ export default function LoginPage() {
                                 </div>
 
                                 <Button type="submit" className="mt-2" disabled={isSubmitting}>
-                                    {isSubmitting ? "loging in..." : "login"}
+                                    {isSubmitting ? "logging in..." : "login"}
                                 </Button>
                             </form>
                         </CardContent>
