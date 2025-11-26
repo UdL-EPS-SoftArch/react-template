@@ -3,25 +3,22 @@
 import Link from "next/link";
 import { useAuth } from "@/app/components/authentication";
 
-// Botón de crear: Solo para ADMIN (por ahora)
+// --- BOTÓN DE CREAR ---
+// (Opcional: decide si un dueño de negocio puede crear más o no)
 export function CreateBusinessButton() {
-
-
-
-    //const { user } = useAuth();
-
-    // role admin for testing
-
+    // 👇 SIMULACIÓN: Usuario "juan_cafes" con rol de negocio
     const user = {
-        authorities: [{ authority: "ROLE_ADMIN" }]
+        username: "juan_cafes",
+        authorities: [{ authority: "ROLE_BUSINESS" }]
     };
 
+    // Aquí puedes decidir: ¿Solo ADMIN crea? ¿O BUSINESS también?
+    // Si quieres que el Business pueda crear, añade "ROLE_BUSINESS" al array.
+    const canCreate = user?.authorities?.some(
+        a => ["ROLE_ADMIN", "ROLE_BUSINESS"].includes(a.authority)
+    );
 
-
-
-    const isAdmin = user?.authorities?.some(a => a.authority === "ROLE_ADMIN");
-
-    if (!isAdmin) return null;
+    if (!canCreate) return null;
 
     return (
         <Link
@@ -36,25 +33,30 @@ export function CreateBusinessButton() {
 
 interface BusinessActionsProps {
     id: string;
-    ownerId: string; // Recibimos el dueño
+    ownerId: string;
 }
 
+// --- BOTONES DE ACCIÓN (EDITAR/BORRAR) ---
 export function BusinessActions({ id, ownerId }: BusinessActionsProps) {
-    //const { user } = useAuth();
+    // 👇 SIMULACIÓN: Estamos logueados como JUAN
     const user = {
-        authorities: [{ authority: "ROLE_ADMIN" }]
+        username: "juan_cafes",
+        authorities: [{ authority: "ROLE_BUSINESS" }]
     };
 
-    // 1. Verificamos si es ADMIN
+    // 1. ¿Es ADMIN? (El Admin siempre puede todo)
     const isAdmin = user?.authorities?.some(a => a.authority === "ROLE_ADMIN");
 
-    // 2. Preparamos la lógica futura para el Dueño (Comentada o inactiva por ahora)
-    // Supongamos que tu usuario tiene un campo 'id' o 'username' que coincide con ownerId
-    // const isOwner = user?.username === ownerId && user?.authorities?.some(a => a.authority === "ROLE_OWNER");
-    const isOwner = false; // <--- Pon esto en true más adelante cuando implementes la lógica
+    // 2. ¿Tiene ROL DE NEGOCIO?
+    const hasBusinessRole = user?.authorities?.some(a => a.authority === "ROLE_BUSINESS");
 
-    // 3. Permiso final: Puede editar si es Admin O si es el Dueño
-    const canEdit = isAdmin || isOwner;
+    // 3. ¿Es SU negocio? (Coincide el usuario logueado con el dueño del negocio)
+    // Nota: Asegúrate que tu objeto user real tenga la propiedad 'username' o 'id'
+    const isOwner = user?.username === ownerId;
+
+    // LÓGICA FINAL:
+    // Puede editar si es Admin O (si tiene rol de negocio Y es el dueño)
+    const canEdit = isAdmin || (hasBusinessRole && isOwner);
 
     if (!canEdit) return null;
 

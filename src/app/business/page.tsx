@@ -13,7 +13,7 @@ type Cafeteria = {
 
 const mockCafeterias: Cafeteria[] = [
     // Asignamos dueños ficticios (users) a cada cafetería
-    { id: "1", name: "The Black Roast", address: "Av. Diagonal 405, BCN", status: "Open", rating: 4.8, hasWifi: true, capacity: 45, ownerId: "user1" },
+    { id: "1", name: "The Black Roast", address: "Av. Diagonal 405, BCN", status: "Open", rating: 4.8, hasWifi: true, capacity: 45, ownerId: "juan_cafes" },
     { id: "2", name: "Espresso Lab", address: "C/ Gran Vía 22, MAD", status: "Open", rating: 4.5, hasWifi: true, capacity: 30, ownerId: "user2" },
     { id: "3", name: "Morning Dew", address: "Plaza Mayor 3", status: "Closed", rating: 3.9, hasWifi: false, capacity: 12, ownerId: "admin" },
     { id: "4", name: "Code & Coffee", address: "Tech Park, Edif B", status: "Open", rating: 5.0, hasWifi: true, capacity: 80, ownerId: "user1" },
