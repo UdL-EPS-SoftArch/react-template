@@ -1,0 +1,41 @@
+"use client";
+
+import Link from "next/link";
+import { useAuth } from "@/app/components/authentication";
+
+export function CreateBusinessButton() {
+    const { user } = useAuth();
+    // Verifica si es ADMIN (o el rol que uses para gestores)
+    const canEdit = user?.authorities?.some(a => a.authority === "ROLE_ADMIN");
+
+    if (!canEdit) return null;
+
+    return (
+        <Link
+            href="/business/new"
+            className="flex items-center gap-2 bg-black text-white px-5 py-2.5 rounded-lg hover:bg-zinc-800 transition dark:bg-white dark:text-black dark:hover:bg-zinc-200 font-medium text-sm shadow-sm"
+        >
+            {/* Icono Plus */}
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            Add Cafeteria
+        </Link>
+    );
+}
+
+export function BusinessActions({ id }: { id: string }) {
+    const { user } = useAuth();
+    const canEdit = user?.authorities?.some(a => a.authority === "ROLE_ADMIN");
+
+    if (!canEdit) return null;
+
+    return (
+        <div className="flex gap-1 ml-auto">
+            <Link href={`/business/${id}/edit`} className="p-2 text-gray-400 hover:text-black hover:bg-gray-100 rounded-md transition dark:hover:text-white dark:hover:bg-zinc-800">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+            </Link>
+            <button className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition dark:hover:text-red-400 dark:hover:bg-red-900/20">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            </button>
+        </div>
+    );
+}

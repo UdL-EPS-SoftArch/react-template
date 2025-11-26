@@ -1,109 +1,106 @@
-import Link from "next/link";
+import { CreateBusinessButton, BusinessActions } from "./action-buttons";
 
-// TIPO DE DATOS (Esto luego vendrá de tu base de datos)
-type Business = {
+// NUEVO MODELO DE DATOS: Cafetería
+type Cafeteria = {
     id: string;
     name: string;
-    industry: string;
-    status: "Active" | "Inactive";
-    employees: number;
+    address: string;
+    status: "Open" | "Closed";
+    rating: number;      // Puntuación de 0 a 5
+    hasWifi: boolean;    // Si tiene wifi o no
+    capacity: number;
 };
 
-// DATOS MOCK (Elimina esto cuando tengas tu BusinessService)
-const mockBusinesses: Business[] = [
-    { id: "1", name: "Acme Corp", industry: "Technology", status: "Active", employees: 120 },
-    { id: "2", name: "Stark Industries", industry: "Defense", status: "Active", employees: 5000 },
-    { id: "3", name: "Wayne Ent", industry: "Finance", status: "Inactive", employees: 10 },
-    { id: "4", name: "Cyberdyne", industry: "AI Research", status: "Active", employees: 350 },
+// DATOS MOCK: Cafeterías de ejemplo
+const mockCafeterias: Cafeteria[] = [
+    { id: "1", name: "The Black Roast", address: "Av. Diagonal 405, BCN", status: "Open", rating: 4.8, hasWifi: true, capacity: 45 },
+    { id: "2", name: "Espresso Lab", address: "C/ Gran Vía 22, MAD", status: "Open", rating: 4.5, hasWifi: true, capacity: 30 },
+    { id: "3", name: "Morning Dew", address: "Plaza Mayor 3", status: "Closed", rating: 3.9, hasWifi: false, capacity: 12 },
+    { id: "4", name: "Code & Coffee", address: "Tech Park, Edif B", status: "Open", rating: 5.0, hasWifi: true, capacity: 80 },
 ];
 
-export default async function BusinessPage() {
-    // Aquí llamarías a tu servicio:
-    // const service = new BusinessService(serverAuthProvider);
-    // const businesses = await service.getBusinesses();
-    const businesses = mockBusinesses; // Usamos los datos falsos por ahora
+export default async function CafeteriasPage() {
+    const cafeterias = mockCafeterias;
 
     return (
-        <div className="min-h-screen bg-zinc-50 font-sans dark:bg-black py-10">
-            <main className="mx-auto w-full max-w-5xl px-6">
+        <div className="min-h-screen bg-zinc-50 font-sans dark:bg-black py-12">
+            <main className="mx-auto w-full max-w-6xl px-6">
 
-                {/* HEADER: Título y Botón de Crear */}
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
+                {/* HEADER */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-10 gap-4 border-b border-gray-200 dark:border-zinc-800 pb-6">
                     <div>
-                        <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
-                            Businesses
+                        <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white flex items-center gap-3">
+                            {/* Icono de Taza Grande */}
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-900 dark:text-white"><path d="M18 8h1a4 4 0 0 1 0 8h-1"></path><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path><line x1="6" y1="1" x2="6" y2="4"></line><line x1="10" y1="1" x2="10" y2="4"></line><line x1="14" y1="1" x2="14" y2="4"></line></svg>
+                            Cafeterias
                         </h1>
-                        <p className="text-gray-500 dark:text-gray-400 mt-1">
-                            Manage your companies and partners.
+                        <p className="text-gray-500 dark:text-gray-400 mt-2 ml-1">
+                            Explore the best spots for coffee and work.
                         </p>
                     </div>
-
-                    <Link
-                        href="/business/new"
-                        className="flex items-center gap-2 bg-black text-white px-5 py-2.5 rounded-lg hover:bg-zinc-800 transition dark:bg-white dark:text-black dark:hover:bg-zinc-200 font-medium text-sm shadow-sm"
-                    >
-                        {/* Icono Plus SVG inline */}
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                        Add Business
-                    </Link>
+                    <CreateBusinessButton />
                 </div>
 
-                {/* CONTENIDO: Grid de Tarjetas */}
+                {/* GRID DE CAFETERÍAS */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {businesses.map((biz) => (
+                    {cafeterias.map((cafe) => (
                         <div
-                            key={biz.id}
-                            className="group relative flex flex-col justify-between border border-gray-200 rounded-xl bg-white p-6 shadow-sm hover:shadow-md hover:border-gray-300 transition dark:bg-black dark:border-zinc-800"
+                            key={cafe.id}
+                            className="group relative flex flex-col justify-between border border-gray-200 rounded-2xl bg-white p-0 shadow-sm hover:shadow-lg hover:border-gray-300 transition-all duration-300 dark:bg-black dark:border-zinc-800 overflow-hidden"
                         >
-                            <div>
+                            {/* Parte Superior: Estado y Nombre */}
+                            <div className="p-6 pb-2">
                                 <div className="flex justify-between items-start mb-4">
-                                    <div className={`text-xs font-semibold px-2 py-1 rounded-full border ${
-                                        biz.status === "Active"
-                                            ? "bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-900"
-                                            : "bg-gray-50 text-gray-600 border-gray-200 dark:bg-zinc-900 dark:text-zinc-400 dark:border-zinc-700"
+                                    {/* Badge de Estado */}
+                                    <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${
+                                        cafe.status === "Open"
+                                            ? "bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-900"
+                                            : "bg-zinc-50 text-zinc-500 border-zinc-200 dark:bg-zinc-900 dark:text-zinc-500 dark:border-zinc-700"
                                     }`}>
-                                        {biz.status}
+                                        <span className={`w-1.5 h-1.5 rounded-full ${cafe.status === "Open" ? "bg-emerald-500" : "bg-zinc-400"}`}></span>
+                                        {cafe.status === "Open" ? "Open Now" : "Closed"}
                                     </div>
 
-                                    {/* Menú de acciones rápidas (visual) */}
-                                    <button className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
-                                    </button>
+                                    {/* Rating (Estrella) */}
+                                    <div className="flex items-center gap-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                        <span>{cafe.rating}</span>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none" className="text-black dark:text-white"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                    </div>
                                 </div>
 
-                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
-                                    {biz.name}
+                                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1 group-hover:underline decoration-2 underline-offset-4 decoration-gray-900 dark:decoration-white">
+                                    {cafe.name}
                                 </h3>
-                                <p className="text-sm text-gray-500 dark:text-gray-400">
-                                    {biz.industry}
-                                </p>
+
+                                <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm mt-2">
+                                    {/* Icono Pin Mapa */}
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                                    {cafe.address}
+                                </div>
                             </div>
 
-                            <div className="mt-6 pt-6 border-t border-gray-100 dark:border-zinc-800 flex items-center justify-between">
-                                <div className="text-sm text-gray-500 dark:text-zinc-500">
-                                    {biz.employees} employees
+                            {/* Parte Inferior: Características y Acciones */}
+                            <div className="mt-4 bg-zinc-50 dark:bg-zinc-900/50 border-t border-gray-100 dark:border-zinc-800 p-4 px-6 flex items-center justify-between">
+                                <div className="flex gap-3 text-xs font-medium text-gray-600 dark:text-gray-400">
+                                    {/* Wifi Badge */}
+                                    {cafe.hasWifi && (
+                                        <span className="flex items-center gap-1 bg-white border border-gray-200 px-2 py-1 rounded dark:bg-black dark:border-zinc-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"></path><path d="M1.42 9a16 16 0 0 1 21.16 0"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line></svg>
+                            Free WiFi
+                        </span>
+                                    )}
+                                    {/* Capacidad */}
+                                    <span className="flex items-center gap-1 px-2 py-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                                        {cafe.capacity}
+                     </span>
                                 </div>
 
-                                <div className="flex gap-2">
-                                    {/* Botón Editar */}
-                                    <Link href={`/business/${biz.id}/edit`} className="p-2 text-gray-500 hover:text-black hover:bg-gray-100 rounded-md transition dark:text-gray-400 dark:hover:text-white dark:hover:bg-zinc-800">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
-                                    </Link>
-                                    {/* Botón Eliminar */}
-                                    <button className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-md transition dark:text-gray-400 dark:hover:text-red-400 dark:hover:bg-red-900/20">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                                    </button>
-                                </div>
+                                {/* Acciones (Editar/Borrar) - Componente Cliente */}
+                                <BusinessActions id={cafe.id} />
                             </div>
                         </div>
                     ))}
-
-                    {/* Estado vacío (si no hay datos) */}
-                    {businesses.length === 0 && (
-                        <div className="col-span-full py-12 text-center text-gray-500 border-2 border-dashed border-gray-200 rounded-xl dark:border-zinc-800">
-                            <p>No businesses found. Get started by adding one.</p>
-                        </div>
-                    )}
                 </div>
             </main>
         </div>
