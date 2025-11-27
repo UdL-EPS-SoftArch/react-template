@@ -1,5 +1,5 @@
 import { getHal, mergeHal, mergeHalArray, postHal } from "./halClient";
-import { Product } from "@/types/product";
+import { Product, ProductEntity } from "@/types/product";
 
 // Objecte dummy per a crides públiques (si no tens autenticació encara)
 const publicAuth = { getAuth: async () => null };
@@ -20,7 +20,7 @@ export async function getProductById(id: string): Promise<Product> {
     return mergeHal<Product>(resource);
 }
 
-export async function createProduct(product: Product): Promise<Product> {
-    const resource = await postHal('/products', product, publicAuth);
+export async function createProduct(product: ProductEntity): Promise<Product> {
+    const resource = await postHal('/products', product as any, publicAuth);
     return mergeHal<Product>(resource);
 }

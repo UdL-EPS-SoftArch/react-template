@@ -1,7 +1,8 @@
 import { getProducts } from "@/api/productApi";
-// IMPORTANT: Assegura't que la ruta d'importació coincideix amb on has guardat el fitxer ProductList.tsx
-// Si el tens a src/components/ProductList.tsx, això és correcte:
-import ProductList from "@/app/components/ProductList"; 
+import ProductList from "@/app/components/ProductList";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react"; 
 
 export default async function ProductsPage() {
     // 1. Cridem al backend des del servidor (Next.js server-side)
@@ -22,7 +23,15 @@ export default async function ProductsPage() {
     return (
         <div className="min-h-screen bg-zinc-50 dark:bg-black py-12 px-6">
             <div className="max-w-7xl mx-auto">
-                <h1 className="text-3xl font-bold mb-8">Our Coffee Products</h1>
+                <div className="flex justify-between items-center mb-8">
+                    <h1 className="text-3xl font-bold">Our Coffee Products</h1>
+                    <Button asChild>
+                        <Link href="/products/new">
+                            <Plus className="mr-2 h-4 w-4" />
+                            Create Product
+                        </Link>
+                    </Button>
+                </div>
 
                 {cleanProducts.length === 0 ? (
                     <div className="text-center py-10">
