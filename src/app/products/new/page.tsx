@@ -7,7 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { createProduct } from "@/api/productApi";
+// 1. Canviem l'import per la Classe i el AuthProvider
+import { ProductService } from "@/api/productApi"; 
+import { clientAuthProvider } from "@/lib/authProvider";
 import { ProductEntity } from "@/types/product";
 
 type ProductFormData = {
@@ -87,7 +89,12 @@ export default function NewProductPage() {
           : [],
       };
 
-      await createProduct(productData);
+      // 2. INSTANCIEM EL SERVEI AMB EL PROVIDER DE CLIENT
+      const productService = new ProductService(clientAuthProvider());
+      
+      // Cridem al mètode de la instància
+      await productService.createProduct(productData);
+      
       router.push("/products");
       router.refresh();
     } catch (err) {

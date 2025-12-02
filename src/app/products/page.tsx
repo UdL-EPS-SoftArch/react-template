@@ -1,18 +1,22 @@
-import { getProducts } from "@/api/productApi";
+import { ProductService } from "@/api/productApi";
 import ProductList from "@/app/components/ProductList";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react"; 
+// Importa el teu provider directament, no cal importar 'cookies' aquí
+import { serverAuthProvider } from "@/lib/authProvider"; 
 
 export default async function ProductsPage() {
-    // 1. Cridem al backend des del servidor (Next.js server-side)
-    const products = await getProducts();
+    
+    // 1. Instanciem el servei utilitzant el serverAuthProvider que ja tens definit
+    // (Aquest ja gestiona el 'await cookies()' internament correctament)
+    const productService = new ProductService(serverAuthProvider);
 
-    // 2. SOLUCIÓ ERROR "Call stack size exceeded":
-    // Transformem els objectes complexos 'Halfred' a objectes simples (JSON)
-    // abans d'enviar-los al component Client.
+    // 2. Cridem al backend
+    const products = await productService.getProducts();
+
     const cleanProducts = products.map((product) => ({
-        id: product.link("self")?.href.split("/").pop() || "#", // Calculem l'ID aquí
+        id: product.link("self")?.href.split("/").pop() || "#",
         name: product.name,
         price: product.price,
         description: product.description,
@@ -43,7 +47,6 @@ export default async function ProductsPage() {
                         </p>
                     </div>
                 ) : (
-                    // 3. Passem els productes "nets" al component client
                     <ProductList initialProducts={cleanProducts} />
                 )}
             </div>

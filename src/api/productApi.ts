@@ -1,26 +1,30 @@
 import { getHal, mergeHal, mergeHalArray, postHal } from "./halClient";
+import type { AuthProvider } from "@/lib/authProvider"; // Assegura't que el tipus existeix
 import { Product, ProductEntity } from "@/types/product";
 
-// Objecte dummy per a crides públiques (si no tens autenticació encara)
-const publicAuth = { getAuth: async () => null };
+export class ProductService {
+    constructor(private authProvider: AuthProvider) {
+    }
 
-export async function getProducts(): Promise<Product[]> {
-    
-    const resource = await getHal("/products", publicAuth);
-    
-    const embedded = resource.embeddedArray("products");
-    // Protecció extra: si no hi ha productes, embeddedArray pot tornar null
-    if (!embedded) return [];
-    
-    return mergeHalArray<Product>(embedded);
-}
+    async getProducts(): Promise<Product[]> {
+        // Ara utilitzem this.authProvider. Si l'usuari està loguejat, enviarà token.
+        // Si no ho està, el provider retornarà null i serà una crida pública.
+        const resource = await getHal("/products", this.authProvider);
+        
+        const embedded = resource.embeddedArray("products");
+        if (!embedded) return [];
+        
+        return mergeHalArray<Product>(embedded);
+    }
 
-export async function getProductById(id: string): Promise<Product> {
-    const resource = await getHal(`/products/${id}`, publicAuth);
-    return mergeHal<Product>(resource);
-}
+    async getProductById(id: string): Promise<Product> {
+        const resource = await getHal(`/products/${id}`, this.authProvider);
+        return mergeHal<Product>(resource);
+    }
 
-export async function createProduct(product: ProductEntity): Promise<Product> {
-    const resource = await postHal('/products', product as Product, publicAuth);
-    return mergeHal<Product>(resource);
+    async createProduct(product: ProductEntity): Promise<Product> {
+        // Aquí és on fallava abans. Ara utilitzarà les credencials injectades.
+        const resource = await postHal('/products', product as Product, this.authProvider);
+        return mergeHal<Product>(resource);
+    }
 }
