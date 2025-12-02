@@ -21,6 +21,6 @@ export async function getProductById(id: string): Promise<Product> {
 }
 
 export async function createProduct(product: ProductEntity): Promise<Product> {
-    const resource = await postHal('/products', product as any, publicAuth);
+    const resource = await postHal('/products', product as Product, publicAuth);
     return mergeHal<Product>(resource);
 }
