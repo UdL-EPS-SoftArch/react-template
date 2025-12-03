@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-// 1. Canviem l'import per la Classe i el AuthProvider
 import { ProductService } from "@/api/productApi"; 
 import { clientAuthProvider } from "@/lib/authProvider";
 import { ProductEntity } from "@/types/product";
@@ -58,19 +57,29 @@ export default function NewProductPage() {
     setError(null);
 
     try {
+      // CONSTRUCCIÓ I NETEJA DE DADES
+      // L'objectiu és convertir cadenes buides "" a undefined perquè el backend rebi null.
       const productData: ProductEntity = {
         name: data.name,
         price: Number(data.price),
-        description: data.description,
+        
+        // Si la descripció és buida, enviem undefined
+        description: data.description && data.description.trim() !== "" ? data.description : undefined,
+        
         stock: data.stock ? Number(data.stock) : 0,
         available: data.available ?? true,
 
-        // NEW FIELDS
-        brand: data.brand,
-        size: data.size,
-        barcode: data.barcode,
+        brand: data.brand && data.brand.trim() !== "" ? data.brand : undefined,
+        size: data.size && data.size.trim() !== "" ? data.size : undefined,
+        
+        // --- CORRECCIÓ CRÍTICA DEL BARCODE ---
+        // Si el barcode és una string buida "", enviem undefined.
+        // Així evitem l'error del @Pattern de Java.
+        barcode: data.barcode && data.barcode.trim().length > 0 ? data.barcode : undefined,
 
-        partOfLoyaltyProgram: data.partOfLoyaltyProgram,
+        partOfLoyaltyProgram: data.partOfLoyaltyProgram ?? false,
+        
+        // Convertim a Number només si existeix valor
         rating: data.rating ? Number(data.rating) : undefined,
         pointsGiven: data.pointsGiven ? Number(data.pointsGiven) : undefined,
         pointsCost: data.pointsCost ? Number(data.pointsCost) : undefined,
@@ -80,26 +89,31 @@ export default function NewProductPage() {
         proteins: data.proteins ? Number(data.proteins) : undefined,
         fats: data.fats ? Number(data.fats) : undefined,
 
-        ingredients: data.ingredients
-          ? data.ingredients.split(",").map((i) => i.trim())
+        // Arrays: Evitem crear arrays amb strings buides [""]
+        ingredients: data.ingredients && data.ingredients.trim().length > 0
+          ? data.ingredients.split(",").map((i) => i.trim()).filter(i => i.length > 0)
           : [],
 
-        allergens: data.allergens
-          ? data.allergens.split(",").map((a) => a.trim())
+        allergens: data.allergens && data.allergens.trim().length > 0
+          ? data.allergens.split(",").map((a) => a.trim()).filter(a => a.length > 0)
           : [],
       };
 
-      // 2. INSTANCIEM EL SERVEI AMB EL PROVIDER DE CLIENT
+      console.log("Enviant dades al backend:", JSON.stringify(productData, null, 2));
+
       const productService = new ProductService(clientAuthProvider());
-      
-      // Cridem al mètode de la instància
       await productService.createProduct(productData);
       
       router.push("/products");
       router.refresh();
     } catch (err) {
       console.error("Error creating product:", err);
-      setError("Failed to create product. Please try again.");
+      // Comprovem si l'error és una instància de Error per accedir al missatge de forma segura
+      let message = "Failed to create product.";
+      if (err instanceof Error) {
+        message = err.message;
+      }
+      setError(`Error: ${message}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -115,7 +129,7 @@ export default function NewProductPage() {
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded break-words text-sm">
                   {error}
                 </div>
               )}
@@ -209,8 +223,22 @@ export default function NewProductPage() {
 
               {/* BARCODE */}
               <div className="space-y-2">
-                <Label htmlFor="barcode">Barcode</Label>
-                <Input id="barcode" {...register("barcode")} placeholder="EAN-13..." />
+                <Label htmlFor="barcode">Barcode (EAN-13)</Label>
+                <Input 
+                    id="barcode" 
+                    {...register("barcode", {
+                        // Opcional: Validació al front per avisar l'usuari abans
+                        pattern: {
+                            value: /^\d{13}$/,
+                            message: "Barcode must be exactly 13 digits"
+                        }
+                    })} 
+                    placeholder="1234567890123" 
+                />
+                <p className="text-xs text-gray-500">Leave empty if not applicable.</p>
+                {errors.barcode && (
+                  <p className="text-sm text-red-500">{errors.barcode.message}</p>
+                )}
               </div>
 
               {/* LOYALTY */}

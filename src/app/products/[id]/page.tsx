@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { getProductById } from "@/api/productApi";
+// 1. Canviem l'import per la Classe, ja que getProductById ara és un mètode d'aquesta classe
+import { ProductService } from "@/api/productApi";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -7,7 +8,16 @@ import { faArrowLeft, faStar, faLeaf, faExclamationTriangle, faBarcode, faCheckC
 
 export default async function ProductDetailPage(props: { params: Promise<{ id: string }> }) {
     const params = await props.params;
-    const product = await getProductById(params.id);
+
+    // 2. Instanciem el servei. 
+    // Com que estem en un Server Component (SSR), no tenim accés al localStorage del navegador.
+    // Passem un proveïdor que retorna null, assumint que veure un producte és públic.
+    const productService = new ProductService({ 
+        getAuth: async () => null 
+    });
+
+    // 3. Cridem al mètode de la instància
+    const product = await productService.getProductById(params.id);
 
     // Detectamos si hay alérgenos para cambiar el estilo de la tarjeta
     const hasAllergens = product.allergens && product.allergens.length > 0;
