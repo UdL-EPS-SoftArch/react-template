@@ -13,8 +13,13 @@ export default function Navbar() {
     const navLinks = [
         { href: "/", label: "Home" },
         { href: "/business", label: "Business", roles: ["ROLE_USER"] },
-        { href: "/inventory", label: "Inventario", roles: ["ROLE_BUSINESS"] },
+        { href: "/inventory", label: "Inventory", roles: ["ROLE_BUSINESS"] },
+        {href: "/products", label: "Products" },
         { href: "/users", label: "Users", roles: ["ROLE_USER"] },
+        {href: "/", label: "Home"},
+        {href: "/business", label: "Business", roles: ["ROLE_USER"]},
+        {href: "/products", label: "Products" },
+        {href: "/users", label: "Users", roles: ["ROLE_USER"]}
     ];
 
     return (
@@ -28,28 +33,22 @@ export default function Navbar() {
                         width={80}
                         height={16}
                         priority
-                    />{" "}
-                    Template
+                    /> Template
                 </div>
 
                 <div className="flex gap-4">
                     {navLinks
-                        .filter(({ roles }) =>
-                            !roles ||
-                            user?.authorities?.some((userAuth) =>
-                                roles.includes(userAuth.authority),
-                            ),
-                        )
-                        .map(({ href, label }) => {
-                            const isActive =
-                                pathname === href || pathname.startsWith(href + "/");
-
+                        .filter(({roles}) =>
+                            !roles || user?.authorities?.some(
+                                userAuth => roles.includes(userAuth.authority)))
+                        .map(({href, label}) => {
+                            const active = pathname === href;
                             return (
                                 <Link
                                     key={href}
                                     href={href}
                                     className={
-                                        isActive
+                                        active
                                             ? "text-blue-600 font-medium border-b-2 border-blue-600 pb-1"
                                             : "text-gray-600 hover:text-gray-900 transition"
                                     }
@@ -61,8 +60,9 @@ export default function Navbar() {
                 </div>
 
                 <div className="ml-auto">
-                    <Loginbar />
+                    <Loginbar/>
                 </div>
+
             </div>
         </nav>
     );
