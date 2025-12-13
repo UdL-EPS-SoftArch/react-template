@@ -3,7 +3,7 @@ import { Resource } from "halfred";
 export interface BasketEntity {
     uri?: string;
     id?: number;            // Long en backend → number en TS
-    customerUri: number; 
+    customerId: number; 
     createdAt?: string;     // ZonedDateTime → string ISO
     updatedAt?: string;
 }
