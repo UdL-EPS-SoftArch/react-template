@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -17,7 +17,9 @@ type FormValues = {
 };
 
 export default function CustomerRegistrationPage() {
-    const service = new CustomerService(clientAuthProvider());
+    const [service, setService] = useState<CustomerService | null>(null);
+    const [mounted, setMounted] = useState(false);
+
     const {
         register,
         handleSubmit,
@@ -26,7 +28,15 @@ export default function CustomerRegistrationPage() {
 
     const router = useRouter();
 
+    // Inicializar el servicio solo en el cliente
+    useEffect(() => {
+        setService(new CustomerService(clientAuthProvider()));
+        setMounted(true);
+    }, []);
+
     const onSubmit: SubmitHandler<FormValues> = async (data) => {
+        if (!service) return;
+
         try {
             const newCustomer = await service.createCustomer(data as Customer);
             const customerId = newCustomer.uri?.split('/').pop();
@@ -35,6 +45,23 @@ export default function CustomerRegistrationPage() {
             console.error("Error creating customer:", error);
         }
     };
+
+    // Mostrar loading mientras se monta
+    if (!mounted) {
+        return (
+            <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
+                <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
+                    <div className="flex flex-col items-center w-full gap-6 text-center sm:items-start sm:text-left">
+                        <Card className="w-full max-w-md">
+                            <CardHeader>
+                                <CardTitle>Loading...</CardTitle>
+                            </CardHeader>
+                        </Card>
+                    </div>
+                </main>
+            </div>
+        );
+    }
 
     return (
         <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
