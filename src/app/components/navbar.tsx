@@ -14,7 +14,9 @@ export default function Navbar() {
         {href: "/", label: "Home"},
         // Aquí está el nuevo botón:
         {href: "/business", label: "Business", roles: ["ROLE_USER"]},
-        {href: "/users", label: "Users", roles: ["ROLE_USER"]}
+        {href: "/users", label: "Users", roles: ["ROLE_USER"]},
+        {href: "/customer/register", label: "Register", roles: ["ROLE_USER"]},
+        {href: "/customer", label: "Register", roles: ["ROLE_USER"]}
     ];
 
     return (

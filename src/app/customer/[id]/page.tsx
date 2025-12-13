@@ -1,5 +1,5 @@
 import { CustomerService } from "@/api/customerApi";
-import { clientAuthProvider } from "@/lib/authProvider";
+import { serverAuthProvider } from "@/lib/authProvider";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 
@@ -8,13 +8,12 @@ export default async function CustomerDetailPage({
                                                  }: {
     params: { id: string };
 }) {
-    const authProvider = await clientAuthProvider();
-    const customerService = new CustomerService(authProvider);
+    const customerService = new CustomerService(serverAuthProvider);
 
     let customer;
     try {
         customer = await customerService.getCustomerById(params.id);
-    } catch (error) {
+    } catch {
         notFound();
     }
 

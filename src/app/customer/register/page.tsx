@@ -3,10 +3,12 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { CustomerEntity } from "@/types/customer";
+import { CustomerService } from "@/api/customerApi";
 import Link from "next/link";
 
 export default function RegisterCustomerPage() {
     const router = useRouter();
+    //admite cualquier dato, así no es necesario declarar el customer como DTO
     const [formData, setFormData] = useState<Omit<CustomerEntity, 'uri'>>({
         name: "",
         email: "",
@@ -30,7 +32,7 @@ export default function RegisterCustomerPage() {
         setIsLoading(true);
 
         try {
-            const response = await fetch("/api/customer/register", {
+            const response = await fetch("/app/customer/register", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -39,18 +41,21 @@ export default function RegisterCustomerPage() {
             });
 
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || "Registration failed");
+                const text = await response.text();
+                throw new Error(text);
             }
 
-            const data = await response.json();
-            router.push("/customer/login");
+            // si el backend devuelve HTML, aquí puedes: redirigir
+            router.push("/customer");
+
+
         } catch (err) {
             setError(err instanceof Error ? err.message : "An error occurred");
         } finally {
             setIsLoading(false);
         }
     };
+
 
     return (
         <div className="container mx-auto p-6">
