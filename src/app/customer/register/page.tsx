@@ -7,18 +7,18 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { User } from "@/types/user";
-import {UsersService} from "@/api/userApi";
-import {clientAuthProvider} from "@/lib/authProvider";
+import { Customer } from "@/types/customer";
+import { CustomerService } from "@/api/customerApi";
+import { clientAuthProvider } from "@/lib/authProvider";
 
 type FormValues = {
-    username: string;
-    email: string;
-    password: string;
+    name: string;
+    phoneNumber: string;
+    email?: string;
 };
 
-export default function RegistrationPage() {
-    const service = new UsersService(clientAuthProvider())
+export default function CustomerRegistrationPage() {
+    const service = new CustomerService(clientAuthProvider());
     const {
         register,
         handleSubmit,
@@ -27,10 +27,14 @@ export default function RegistrationPage() {
 
     const router = useRouter();
 
-    const onSubmit: SubmitHandler<FormValues> = (data) => {
-        service.createUser(data as User).then(() => {
-            router.push("/login");
-        })
+    const onSubmit: SubmitHandler<FormValues> = async (data) => {
+        try {
+            const newCustomer = await service.createCustomer(data as Customer);
+            const customerId = newCustomer.uri?.split('/').pop();
+            router.push(`/customer/${customerId}`);
+        } catch (error) {
+            console.error("Error creating customer:", error);
+        }
     };
 
     return (
@@ -39,57 +43,66 @@ export default function RegistrationPage() {
                 <div className="flex flex-col items-center w-full gap-6 text-center sm:items-start sm:text-left">
                     <Card className="w-full max-w-md">
                         <CardHeader>
-                            <CardTitle>Register</CardTitle>
+                            <CardTitle>New Customer</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
                                 <div>
                                     <Label htmlFor="name">Name</Label>
                                     <Input
-                                        id="username"
-                                        {...register("username", { required: "Username is required" })}
+                                        id="name"
+                                        {...register("name", {
+                                            required: "Name is required"
+                                        })}
                                     />
-                                    {errors.username && (
-                                        <p className="text-sm text-red-600 mt-1">{errors.username.message}</p>
+                                    {errors.name && (
+                                        <p className="text-sm text-red-600 mt-1">
+                                            {errors.name.message}
+                                        </p>
                                     )}
                                 </div>
 
                                 <div>
-                                    <Label htmlFor="email">Email</Label>
+                                    <Label htmlFor="phoneNumber">Phone Number</Label>
+                                    <Input
+                                        id="phoneNumber"
+                                        type="tel"
+                                        {...register("phoneNumber", {
+                                            required: "Phone number is required",
+                                            pattern: {
+                                                value: /^[0-9]{9}$/,
+                                                message: "Must be 9 digits",
+                                            },
+                                        })}
+                                    />
+                                    {errors.phoneNumber && (
+                                        <p className="text-sm text-red-600 mt-1">
+                                            {errors.phoneNumber.message}
+                                        </p>
+                                    )}
+                                </div>
+
+                                <div>
+                                    <Label htmlFor="email">Email (optional)</Label>
                                     <Input
                                         id="email"
                                         type="email"
                                         {...register("email", {
-                                            required: "Email is required",
                                             pattern: {
                                                 value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                                                message: "Invalid email address",
+                                                message: "Invalid email",
                                             },
                                         })}
                                     />
                                     {errors.email && (
-                                        <p className="text-sm text-red-600 mt-1">{errors.email.message}</p>
-                                    )}
-                                </div>
-
-                                <div>
-                                    <Label htmlFor="password">Password</Label>
-                                    <Input
-                                        id="password"
-                                        type="password"
-                                        {...register("password", {
-                                            required: "Password is required",
-                                            minLength: { value: 6, message: "Minimum 8 characters" },
-                                            maxLength: { value: 256, message: "Maximum 256 characters" }
-                                        })}
-                                    />
-                                    {errors.password && (
-                                        <p className="text-sm text-red-600 mt-1">{errors.password.message}</p>
+                                        <p className="text-sm text-red-600 mt-1">
+                                            {errors.email.message}
+                                        </p>
                                     )}
                                 </div>
 
                                 <Button type="submit" className="mt-2" disabled={isSubmitting}>
-                                    {isSubmitting ? "Registering..." : "Register"}
+                                    {isSubmitting ? "Creating..." : "Create Customer"}
                                 </Button>
                             </form>
                         </CardContent>
