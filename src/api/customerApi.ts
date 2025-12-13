@@ -1,9 +1,10 @@
 import { getHal, mergeHal, mergeHalArray, postHal } from "./halClient";
 import type { AuthProvider } from "@/lib/authProvider";
-import { Customer } from "@/types/customer";
+import {Customer, NewCustomerDTO} from "@/types/customer";
+import { postHalJson } from "./halJsonClient";
 
 export class CustomerService {
-    constructor(private authProvider: AuthProvider) {
+    constructor(private readonly authProvider: AuthProvider) {
     }
 
     async getCustomers(): Promise<Customer[]> {
@@ -12,10 +13,15 @@ export class CustomerService {
         return mergeHalArray<Customer>(embedded);
     }
 
-    async createCustomer(data: Partial<Customer>): Promise<Customer> {
-        const resource = await postHal("/customers", data, this.authProvider);
+
+    /** Crear cliente con JSON plano (DTO) */
+
+    async createCustomer(data: NewCustomerDTO): Promise<Customer> {
+        const resource = await postHalJson("/customers", data, this.authProvider);
         return mergeHal<Customer>(resource);
     }
+
+
 
     async getCustomerById(id: string): Promise<Customer> {
         const resource = await getHal(`/customers/${id}`, this.authProvider);
