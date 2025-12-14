@@ -8,11 +8,14 @@ import Loginbar from "@/app/components/loginbar";
 
 export default function Navbar() {
     const pathname = usePathname();
-    const {user} = useAuth();
+    const { user } = useAuth();
 
     const navLinks = [
-        {href: "/", label: "Home"},
-        {href: "/users", label: "Users", roles: ["ROLE_USER"]}
+        { href: "/", label: "Home" },
+        { href: "/business", label: "Business", roles: ["ROLE_USER"] },
+        { href: "/inventory", label: "Inventory", roles: ["ROLE_BUSINESS"] },
+        { href: "/products", label: "Products" },
+        { href: "/users", label: "Users", roles: ["ROLE_USER"] },
     ];
 
     return (
