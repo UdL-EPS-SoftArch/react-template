@@ -3,16 +3,12 @@ import { serverAuthProvider } from "@/lib/authProvider";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 
-export default async function CustomerDetailPage({
-                                                     params,
-                                                 }: {
-    params: { id: string };
-}) {
+export default async function CustomerDetailPage(props: { params: Promise<{ id: string }> }) {
     const customerService = new CustomerService(serverAuthProvider);
 
     let customer;
     try {
-        customer = await customerService.getCustomerById(params.id);
+        customer = await customerService.getCustomerById((await props.params).id);
     } catch {
         notFound();
     }
