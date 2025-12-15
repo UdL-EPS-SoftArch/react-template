@@ -21,19 +21,19 @@ export default function NewBasketPage() {
       setError("You must be logged in to create a basket.");
       return;
     }
-    
+
     setIsSubmitting(true);
     setError(null);
 
     try {
       const basketData: BasketEntity = {
-        username: user.username,
+        customer: "/customers/" + user.username,
       };
 
       const basketService = new BasketService(clientAuthProvider());
       const created = await basketService.createBasket(basketData);
 
-      router.push(`/baskets/${created.id}`);
+      router.push('/baskets');
       router.refresh();
     } catch (err) {
       console.error("Error creating basket:", err);

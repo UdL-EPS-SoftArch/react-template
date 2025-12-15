@@ -34,7 +34,7 @@ export default async function BasketDetailPage(props: { params: Promise<{ id: st
           <CardContent className="space-y-4 text-sm text-gray-700 dark:text-gray-300">
             <div>
               <span className="font-semibold">Customer ID: </span>
-              <span>{basket.username}</span>
+              <span>{basket.customer}</span>
             </div>
             {basket.createdAt && (
               <div>
