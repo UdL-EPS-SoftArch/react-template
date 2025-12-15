@@ -4,7 +4,7 @@ import { UserEntity } from "./user";
 export interface BasketEntity {
     uri?: string;
     id?: number;            // Long en backend → number en TS
-    username: string;
+    customer: string;
     createdAt?: string;     // ZonedDateTime → string ISO
     updatedAt?: string;
 }
