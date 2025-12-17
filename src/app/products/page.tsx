@@ -1,5 +1,5 @@
 import { ProductService } from "@/api/productApi";
-import { UsersService } from "@/api/userApi"; // <--- 1. Importem el servei d'usuaris
+import { UsersService } from "@/api/userApi";
 import ProductList from "@/app/components/ProductList";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -8,22 +8,19 @@ import { serverAuthProvider } from "@/lib/authProvider";
 
 export default async function ProductsPage() {
     
-    
     const productService = new ProductService(serverAuthProvider);
     const usersService = new UsersService(serverAuthProvider); 
 
-    
     const [products, currentUser] = await Promise.all([
         productService.getProducts(),
         usersService.getCurrentUser()
     ]);
 
-    
     const isAdmin = currentUser?.authorities?.some(
         auth => auth.authority === "ROLE_ADMIN"
     );
 
-    
+    // Mapeig de dades (incloent categoryName)
     const cleanProducts = products.map((product) => ({
         id: product.link("self")?.href.split("/").pop() || "#",
         name: product.name,
@@ -31,6 +28,8 @@ export default async function ProductsPage() {
         description: product.description,
         stock: product.stock,
         available: product.available,
+        // Aquí s'assigna el valor. TypeScript ara estarà content perquè ProductList ho espera.
+        categoryName: product.categoryName || product.category?.name || "General"
     }));
 
     return (
@@ -39,7 +38,6 @@ export default async function ProductsPage() {
                 <div className="flex justify-between items-center mb-8">
                     <h1 className="text-3xl font-bold">Our Coffee Products</h1>
                     
-                    {/* Renderitzat condicional: Només es mostra si isAdmin és true */}
                     {isAdmin && (
                         <Button asChild>
                             <Link href="/products/new">
@@ -48,7 +46,6 @@ export default async function ProductsPage() {
                             </Link>
                         </Button>
                     )}
-
                 </div>
 
                 {cleanProducts.length === 0 ? (
@@ -61,6 +58,7 @@ export default async function ProductsPage() {
                         </p>
                     </div>
                 ) : (
+                    /* He tret el comentari d'aquí per evitar l'error de sintaxi JSX */
                     <ProductList initialProducts={cleanProducts} />
                 )}
             </div>

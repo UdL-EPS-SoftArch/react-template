@@ -5,9 +5,10 @@ import Link from "next/link";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { SearchBar } from "@/app/components/searchBar";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTag } from "@fortawesome/free-solid-svg-icons"; // Assegura't de tenir instal·lat fontawesome o fes servir Lucide
 
-// Definim una interfície simple per al component de visualització
-// Ja no depenem de la interfície complexa 'Product' amb Halfred aquí
+// 1. ACTUALITZEM LA INTERFÍCIE
 interface SimpleProduct {
   id: string;
   name: string;
@@ -15,6 +16,7 @@ interface SimpleProduct {
   description?: string;
   stock?: number;
   available?: boolean;
+  categoryName: string; // <--- AFEGIT: Ara és obligatori
 }
 
 interface ProductListProps {
@@ -25,7 +27,8 @@ export default function ProductList({ initialProducts }: ProductListProps) {
   const [searchTerm, setSearchTerm] = useState("");
 
   const filteredProducts = initialProducts.filter((product) =>
-    product.name.toLowerCase().includes(searchTerm.toLowerCase())
+    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    product.categoryName.toLowerCase().includes(searchTerm.toLowerCase()) // Ara busquem també per categoria
   );
 
   return (
@@ -37,16 +40,24 @@ export default function ProductList({ initialProducts }: ProductListProps) {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {filteredProducts.map((product) => {
-            // Ja no hem de calcular l'ID aquí, ve net des del servidor
             const stockCount = Number(product.stock || 0);
             const hasStock = stockCount > 0;
 
             return (
-              <Card key={product.id} className="flex flex-col h-full">
+              <Card key={product.id} className="flex flex-col h-full relative group hover:shadow-lg transition-shadow">
                 <CardHeader>
                   <div className="flex justify-between items-start">
-                    <CardTitle className="text-xl">{product.name}</CardTitle>
-                    <span className="font-bold text-lg text-blue-600">
+                    <div className="space-y-2">
+                        {/* 2. PINTEM LA CATEGORIA COM UN BADGE */}
+                        <span className="inline-flex items-center gap-1 bg-slate-100 text-slate-600 text-xs px-2 py-1 rounded-full font-medium uppercase tracking-wide">
+                            <FontAwesomeIcon icon={faTag} className="w-3 h-3" />
+                            {product.categoryName}
+                        </span>
+                        <CardTitle className="text-xl line-clamp-1" title={product.name}>
+                            {product.name}
+                        </CardTitle>
+                    </div>
+                    <span className="font-bold text-lg text-blue-600 whitespace-nowrap">
                       {product.price}€
                     </span>
                   </div>
