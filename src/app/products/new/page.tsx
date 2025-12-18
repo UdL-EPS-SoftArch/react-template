@@ -1,15 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ProductService } from "@/api/productApi"; 
+import { ProductService } from "@/api/productApi";
+import { CategoryService } from "@/api/categoryApi";
 import { clientAuthProvider } from "@/lib/authProvider";
 import { ProductEntity } from "@/types/product";
+import { Category } from "@/types/category";
 
 type ProductFormData = {
   name: string;
@@ -19,6 +21,7 @@ type ProductFormData = {
   brand?: string;
   size?: string;
   barcode?: string;
+  category?: string;
 
   available?: boolean;
   partOfLoyaltyProgram?: boolean;
@@ -32,14 +35,16 @@ type ProductFormData = {
   proteins?: number;
   fats?: number;
 
-  ingredients?: string; 
-  allergens?: string;   
+  ingredients?: string;
+  allergens?: string;
 };
 
 export default function NewProductPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
 
   const {
     register,
@@ -51,6 +56,26 @@ export default function NewProductPage() {
       stock: 0,
     },
   });
+
+  // Carregar categories al muntar el component
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const categoryService = new CategoryService(clientAuthProvider());
+        const fetchedCategories = await categoryService.getCategories();
+        const categoryList = fetchedCategories.map((cat: Category) => ({
+          id: cat.link("self")?.href.split("/").pop() || "",
+          name: cat.name,
+        }));
+        setCategories(categoryList);
+      } catch (err) {
+        console.error("Error loading categories:", err);
+      } finally {
+        setLoadingCategories(false);
+      }
+    };
+    loadCategories();
+  }, []);
 
   const onSubmit = async (data: ProductFormData) => {
     setIsSubmitting(true);
@@ -72,9 +97,7 @@ export default function NewProductPage() {
         brand: data.brand && data.brand.trim() !== "" ? data.brand : undefined,
         size: data.size && data.size.trim() !== "" ? data.size : undefined,
         
-        // --- CORRECCIÓ CRÍTICA DEL BARCODE ---
-        // Si el barcode és una string buida "", enviem undefined.
-        // Així evitem l'error del @Pattern de Java.
+        // Si el barcode és una string buida "", enviem undefined
         barcode: data.barcode && data.barcode.trim().length > 0 ? data.barcode : undefined,
 
         partOfLoyaltyProgram: data.partOfLoyaltyProgram ?? false,
@@ -99,10 +122,16 @@ export default function NewProductPage() {
           : [],
       };
 
-      console.log("Enviant dades al backend:", JSON.stringify(productData, null, 2));
+      // Si s'ha seleccionat una categoria, afegim la URI
+      const productPayload = {
+        ...productData,
+        ...(data.category && data.category !== "" ? { category: `/categories/${data.category}` } : {}),
+      };
+
+      console.log("Enviant dades al backend:", JSON.stringify(productPayload, null, 2));
 
       const productService = new ProductService(clientAuthProvider());
-      await productService.createProduct(productData);
+      await productService.createProduct(productPayload as ProductEntity);
       
       router.push("/products");
       router.refresh();
@@ -176,8 +205,36 @@ export default function NewProductPage() {
                   id="description"
                   {...register("description")}
                   placeholder="Product description..."
-                  className="w-full min-h-[100px] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full min-h-[100px] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-zinc-900 dark:border-zinc-700"
                 />
+              </div>
+
+              {/* CATEGORY */}
+              <div className="space-y-2">
+                <Label htmlFor="category">Category</Label>
+                <select
+                  id="category"
+                  {...register("category")}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white dark:bg-zinc-900 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  disabled={loadingCategories}
+                >
+                  <option value="">-- Select Category --</option>
+                  {categories.map((cat) => (
+                    <option key={cat.id} value={cat.id}>
+                      {cat.name}
+                    </option>
+                  ))}
+                </select>
+                {loadingCategories && (
+                  <p className="text-xs text-gray-500">Loading categories...</p>
+                )}
+              </div>
+
+              {/* NOTE: Images can be uploaded after creating the product */}
+              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/30 rounded-md p-3">
+                <p className="text-sm text-blue-700 dark:text-blue-300">
+                  Product images can be uploaded after creating the product from the product details page.
+                </p>
               </div>
 
               {/* STOCK */}
