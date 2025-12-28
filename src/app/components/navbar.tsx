@@ -12,7 +12,12 @@ export default function Navbar() {
 
     const navLinks = [
         {href: "/", label: "Home"},
-        {href: "/users", label: "Users", roles: ["ROLE_USER"]}
+        {href: "/business", label: "Business", roles: ["ROLE_USER"]},
+        {href: "/products", label: "Products" },
+        {href: "/users", label: "Users", roles: ["ROLE_USER"]},
+        {href: "/customer/register", label: "Register"},
+        {href: "/customer", label: "Users", roles: ["ROLE_USER"]},
+        {href: "/customer/login", label: "Users", roles: ["ROLE_USER"]},
     ];
 
     return (
