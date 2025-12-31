@@ -2,7 +2,7 @@ import Image from "next/image";
 
 export default function Home() {
   return (
-    // Canviem el fons a colors més càlids (stone) típics de cafeteria
+    
     <div className="min-h-screen bg-stone-50 text-stone-900 font-sans">
       <main className="flex flex-col min-h-screen">
         {/* Aquí aniran els components més tard */}
